@@ -1,0 +1,132 @@
+@font-face {
+  font-family: 'arcade';
+  src: url('../fonts/ARCADECLASSIC.TTF');
+}
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin:0;
+  padding:0;
+  border:0;
+  font-size:100%;
+  font:inherit;
+  font-family: arcade;
+  vertical-align:baseline
+} 
+
+.background    {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background: url(../textures/background.jpg);
+  table-layout: fixed;
+  border-spacing: 0;
+}
+
+.background td {
+  padding: 0;
+}
+
+.lava {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url(../textures/lava.gif)
+}
+
+.wall {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url(../textures/wall.jpg)
+}
+
+.actor  {
+  position: absolute;
+}
+
+.coin {
+  background: rgb(241, 229, 89);
+  border-radius: 50%;
+}
+
+.player {
+  background-size: 16px 30px;
+  background-repeat: no-repeat;
+  background-image: url(../textures/knight.png)
+}
+
+.lost .player {
+  background-size: 16px 30px;
+  background-repeat: no-repeat;
+  background-image: url(../textures/knight-lost.png)
+}
+
+.won .player {
+  background-size: 16px 30px;
+  background-repeat: no-repeat;
+  background-image: url(../textures/knight-win.png)
+}
+
+.game {
+  overflow: hidden;
+  max-width: 600px;
+  max-height: 450px;
+  position: relative;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.screen-absolute {
+  display: none;
+  position: absolute;
+  right: calc(100% / 2 - 150px);
+  bottom: calc(100% / 2);
+  width: 297px;
+  height: 83px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url(../textures/pause.png); 
+}
+
+.panel {
+  display: flex;
+  background-repeat: repeat-x;
+  background-image: url(../textures/panel.png);
+  width: 600px;
+  position: relative;
+}
+ 
+.health {
+  margin: 20px 10px 20px;
+  width: 30px;
+  height: 30px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url(../textures/heart.png);
+}
+
+.panel .level {
+  position: absolute;
+  right: 20px;
+  line-height: 70px;
+  font-size: 24px;
+  color: aliceblue;
+}
+
+.you-win {
+  width: 800px;
+  height: 440px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url(../textures/you-win.png); 
+}
+
+.you-lose {
+  width: 800px;
+  height: 440px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url(../textures/you-lose.png);  
+}
