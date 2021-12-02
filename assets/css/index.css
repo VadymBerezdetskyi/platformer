@@ -52,6 +52,18 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   background-image: url(../textures/knight.png)
 }
 
+.enemy {
+  background-size: 16px 30px;
+  background-repeat: no-repeat;
+  background-image: url(../textures/enemy111.png)
+}
+
+.arrow {
+  background-size: 30px 16px;
+  background-repeat: no-repeat;
+  background-image: url(../textures/dynamite111.png)
+}
+
 .lost .player {
   background-size: 16px 30px;
   background-repeat: no-repeat;

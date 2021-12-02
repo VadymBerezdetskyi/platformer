@@ -6,8 +6,24 @@ class Vector {
    * @param {number} y 
    */
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this._x = `${x}`;
+    this._y = `${y}`;
+  }
+
+  get x() {
+    return parseFloat(this._x);
+  }
+
+  get y() {
+    return parseFloat(this._y);
+  }
+
+  set x(setx) {
+    this._x = `${setx}`
+  }
+
+  set y(setY) {
+    this._y = `${setY}`
   }
 
   /**
@@ -15,7 +31,7 @@ class Vector {
    * @returns {Vector} 
    */
   plus(other) {
-    return new Vector(this.x + other.x, this.y + other.y);
+    return new Vector(parseFloat(this.x) + other.x, parseFloat(this.y) + other.y);
   }
 
   /**
@@ -23,7 +39,7 @@ class Vector {
    * @returns {Vector}
    */
   times(factor) {
-    return new Vector(this.x * factor, this.y * factor);
+    return new Vector(parseFloat(this.x) * factor, parseFloat(this.y) * factor);
   }
 }
 
@@ -39,7 +55,7 @@ class Player {
   }
 
   /**
-   * #TODO
+   * #
    * @param {*} step 
    * @param {Level} level Current level
    * @param {*} keys 
@@ -52,14 +68,15 @@ class Player {
     var motion = new Vector(this.speed.x * step, 0);
     var newPos = this.pos.plus(motion);
     var obstacle = level.obstacleAt(newPos, this.size);
-    if (obstacle)
+    if (obstacle) {
       level.playerTouched(obstacle);
-    else
+    } else {
       this.pos = newPos;
+    }
   }
 
   /**
-   * TODO
+   * 
    * @param {*} step 
    * @param {Level} level 
    * @param {*} keys 
@@ -81,7 +98,6 @@ class Player {
   }
 
   /**
-   * TODO
    * @param {*} step 
    * @param {Level} level 
    * @param {*} keys 
@@ -90,14 +106,72 @@ class Player {
     this.moveX(step, level, keys);
     this.moveY(step, level, keys);
   
-    var otherActor = level.actorAt(this);
-    if (otherActor)
+    const otherActor = level.actorAt(this);
+    if (otherActor) {
       level.playerTouched(otherActor.type, otherActor);
+    }
   
     // Losing animation
     if (level.status == "lost") {
       this.pos.y += step;
       this.size.y -= step;
+    }
+  }
+}
+
+class Arrow {
+  constructor(pos, direction) {
+    this.id = Date.now();
+    this.pos = pos;
+    this.type = 'arrow';
+    this.speed = new Vector(direction > 0 ? 3 : -3, 0);
+    this.size = new Vector(1, 0.5);
+  }
+
+  act(step, level) {
+    const newPos = this.pos.plus(this.speed.times(step));
+    if (level.obstacleAt(newPos, this.size)) {
+      level.removeActor(this.id);
+    } else {
+      this.pos = newPos;
+    }
+  }
+}
+
+class Enemy {
+  constructor(pos) {
+    this.id = Date.now();
+    this.pos = pos.plus(new Vector(0, -0.5));
+    this.type = 'enemy';
+    this.speed = new Vector(1, 0);
+    this.size = new Vector(0.8, 1.5);
+    this.interval = null;
+  }
+
+  changeDirection() {
+    this.speed = this.speed.times(-1);
+  }
+
+  shoot(level) {
+    level.addActor(new Arrow(this.pos, this.speed.x));
+  }
+
+  act(step, level) {
+    const newPos = this.pos.plus(this.speed.times(step));
+    if (level.obstacleAt(newPos, this.size) || !level.safeGroundAt(new Vector(this.speed.x > 0 ? this.pos.x + this.size.x : this.pos.x - this.size.x, this.pos.y), this.size)) {
+      this.changeDirection();
+    } else {
+      this.pos = newPos;
+    }
+    
+    if (level.isPlayerInEyeshot(this.pos, this.speed.x) && !this.interval) {
+      console.log('see you')
+      this.shoot(level);
+      this.interval = setInterval(() =>{
+        this.shoot(level);
+        clearInterval(this.interval);
+        this.interval = null;
+      }, 2000);
     }
   }
 }
@@ -140,7 +214,7 @@ class Coin {
   }
 
   /**
-   * TODO
+   * 
    * @param {*} step 
    */
   act(step) {
@@ -156,6 +230,7 @@ const actorChars = {
   "=": Lava,
   "|": Lava,
   "v": Lava,
+  "$": Enemy,
 };
 
 class Level {
@@ -184,11 +259,43 @@ class Level {
       this.grid.push(gridLine);
     }
   
-    this.player = this.actors.filter(function(actor) {
-      return actor.type == "player";
-    })[0];
-
+    this.player = this.actors.filter(a => a.type == "player")[0];
     this.status = this.finishDelay = null;
+  }
+
+  addActor(actor) {
+    this.actors.push(actor);
+  }
+
+  removeActor(id) {
+    this.actors = this.actors.filter(a => a.id !== id);
+  }
+
+  /**
+   * Check if there is a line between position and player
+   * @param {Vector} pos1
+   * @returns {boolean}
+   */
+  isPlayerInEyeshot(pos1, direction) {
+    const player = this.actors.filter(a => a.type == 'player')[0];
+    const startY = pos1.y - (player.size.y / 2);
+    const endY = (player.size.y / 2) + pos1.y;
+    const byX = direction > 0 ? player.pos.x > pos1.x : player.pos.x < pos1.x;
+    const ByY = player.pos.y > startY && player.pos.y < endY;
+    
+    let obstacleBetween = false;
+    for (var y = Math.floor(startY); y < Math.ceil(endY); y++) {
+      for (var x = Math.floor(direction > 0 ? pos1.x : player.pos.x); x < Math.ceil(direction > 0 ? player.pos.x : pos1.x); x++) {
+        if (this.grid[y][x]) obstacleBetween = true;
+      }
+    }
+
+    
+    return byX && ByY && !obstacleBetween;
+  }
+
+  safeGroundAt(pos, size) {
+    return this.obstacleAt(new Vector(pos.x, pos.y + 1), size) === 'wall';
   }
 
   /**
@@ -240,7 +347,6 @@ class Level {
   }
 
   /**
-   * TODO
    * @param {*} step 
    * @param {*} keys 
    */
@@ -266,7 +372,7 @@ class Level {
       return;
     }
 
-    if (type == "lava") {
+    if (type === "lava" || type === 'arrow') {
       this.status = "lost";
       this.finishDelay = 1;
     } else if (type == "coin") {
@@ -313,7 +419,7 @@ class DOMDisplay {
   }
 
   /**
-   * TODO
+   * 
    * @returns 
    */
   drawBackground() {
@@ -330,7 +436,7 @@ class DOMDisplay {
   }
 
   /**
-   * TODO
+   * 
    * @returns {}
    */
   drawActors() {
@@ -355,7 +461,7 @@ class DOMDisplay {
   }
 
   /**
-   * TODO
+   * 
    */
   scrollPlayerIntoView() {
     var width = this.wrap.clientWidth;
